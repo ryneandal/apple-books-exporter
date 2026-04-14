@@ -37,14 +37,16 @@ jobs:
           chmod +x apple-books-data-export
 
       - name: Archive
+        env:
+          VERSION: ${{ github.ref_name }}
         run: |
-          tar czvf apple-books-data-export-macos-universal.tar.gz apple-books-data-export
-          shasum -a 256 apple-books-data-export-macos-universal.tar.gz > apple-books-data-export-macos-universal.tar.gz.sha256
+          tar czvf "apple-books-data-export-${VERSION}.tar.gz" apple-books-data-export
+          shasum -a 256 "apple-books-data-export-${VERSION}.tar.gz" > "apple-books-data-export-${VERSION}.tar.gz.sha256"
 
       - name: GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           generate_release_notes: true
           files: |
-            apple-books-data-export-macos-universal.tar.gz
-            apple-books-data-export-macos-universal.tar.gz.sha256
+            apple-books-data-export-${{ github.ref_name }}.tar.gz
+            apple-books-data-export-${{ github.ref_name }}.tar.gz.sha256
