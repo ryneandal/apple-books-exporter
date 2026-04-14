@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use clap::{Parser, Subcommand, ValueEnum};
 
 #[derive(Debug, Parser)]
-#[command(name = "books-export")]
+#[command(name = "apple-books-data-export")]
 #[command(about = "Export Apple Books reading data as JSON or CSV")]
 pub struct Cli {
     #[arg(long, global = true)]

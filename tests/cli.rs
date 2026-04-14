@@ -16,7 +16,7 @@ fn export_json_from_fixture_db() {
     let db_path = tempdir.path().join("valid_bklibrary.sqlite");
     create_valid_library_db(&db_path);
 
-    Command::cargo_bin("books-export")
+    Command::cargo_bin("apple-books-data-export")
         .expect("binary")
         .args(["export", "--db"])
         .arg(&db_path)
@@ -33,7 +33,7 @@ fn export_csv_from_fixture_db() {
     let db_path = tempdir.path().join("valid_bklibrary.sqlite");
     create_valid_library_db(&db_path);
 
-    Command::cargo_bin("books-export")
+    Command::cargo_bin("apple-books-data-export")
         .expect("binary")
         .args(["export", "--db"])
         .arg(&db_path)
@@ -52,7 +52,7 @@ fn inspect_fixture_db() {
     let db_path = tempdir.path().join("valid_bklibrary.sqlite");
     create_valid_library_db(&db_path);
 
-    Command::cargo_bin("books-export")
+    Command::cargo_bin("apple-books-data-export")
         .expect("binary")
         .args(["inspect", "--db"])
         .arg(&db_path)
@@ -69,7 +69,7 @@ fn export_writes_to_output_file() {
     let output_path = tempdir.path().join("books.json");
     create_valid_library_db(&db_path);
 
-    Command::cargo_bin("books-export")
+    Command::cargo_bin("apple-books-data-export")
         .expect("binary")
         .args(["export", "--db"])
         .arg(&db_path)

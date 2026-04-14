@@ -35,6 +35,7 @@ fn run_cli(cli: Cli, stdout: &mut impl Write, stderr: &mut impl Write) -> Result
         stderr,
         "Have issues/comments/improvements? Let me know at https://github.com/ryne/apple-books-exporter"
     )?;
+    writeln!(stderr, "")?;
 
     match cli.command {
         Commands::Discover => {
