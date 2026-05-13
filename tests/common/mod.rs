@@ -16,9 +16,7 @@ pub fn create_valid_library_db(path: &Path) {
             ZLASTOPENDATE REAL,
             ZLASTENGAGEDDATE REAL,
             ZCREATIONDATE REAL,
-            ZASSETID INTEGER,
             ZASSETGUID TEXT,
-            ZSTOREID INTEGER,
             ZGENRE TEXT
         );
         "#,
@@ -37,11 +35,9 @@ pub fn create_valid_library_db(path: &Path) {
             ZLASTOPENDATE,
             ZLASTENGAGEDDATE,
             ZCREATIONDATE,
-            ZASSETID,
             ZASSETGUID,
-            ZSTOREID,
             ZGENRE
-        ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)
+        ) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)
         "#,
         params![
             "The Great Gatsby",
@@ -53,9 +49,7 @@ pub fn create_valid_library_db(path: &Path) {
             719_844_887.0,
             719_876_708.0,
             748_980_784.0,
-            914_355_894_i64,
             "0511A38E-2F6B-4521-8116-D1E4FB0324AC",
-            914_355_894_i64,
             "Classics"
         ],
     )

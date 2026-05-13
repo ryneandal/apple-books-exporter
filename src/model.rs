@@ -50,9 +50,7 @@ pub(crate) struct BookRecord {
     pub(crate) last_engaged_at: Option<DateTime<Utc>>,
     #[serde(serialize_with = "crate::model::serialize_optional_datetime")]
     pub(crate) library_record_created_at: Option<DateTime<Utc>>,
-    pub(crate) asset_id: Option<i64>,
     pub(crate) asset_guid: Option<String>,
-    pub(crate) store_id: Option<i64>,
     pub(crate) genre: Option<String>,
 }
 

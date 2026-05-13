@@ -41,7 +41,7 @@ fn export_csv_from_fixture_db() {
         .assert()
         .success()
         .stdout(predicate::str::contains(
-            "title,author,status,reading_progress,high_watermark_progress,finished_at,last_opened_at,last_engaged_at,library_record_created_at,asset_id,asset_guid,store_id,genre",
+            "title,author,status,reading_progress,high_watermark_progress,finished_at,last_opened_at,last_engaged_at,library_record_created_at,asset_guid,genre",
         ))
         .stdout(predicate::str::contains("The Great Gatsby"));
 }

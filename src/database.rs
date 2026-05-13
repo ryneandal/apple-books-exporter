@@ -21,9 +21,7 @@ pub(crate) const REQUIRED_COLUMNS: &[&str] = &[
     "ZLASTOPENDATE",
     "ZLASTENGAGEDDATE",
     "ZCREATIONDATE",
-    "ZASSETID",
     "ZASSETGUID",
-    "ZSTOREID",
     "ZGENRE",
 ];
 pub(crate) const PROGRESS_RELATED_COLUMNS: &[&str] = &[
@@ -46,9 +44,7 @@ SELECT
     ZLASTOPENDATE,
     ZLASTENGAGEDDATE,
     ZCREATIONDATE,
-    ZASSETID,
     ZASSETGUID,
-    ZSTOREID,
     ZGENRE
 FROM ZBKLIBRARYASSET
 "#;
@@ -62,10 +58,8 @@ const COL_DATE_FINISHED: usize = 5;
 const COL_LAST_OPEN_DATE: usize = 6;
 const COL_LAST_ENGAGED_DATE: usize = 7;
 const COL_CREATION_DATE: usize = 8;
-const COL_ASSET_ID: usize = 9;
-const COL_ASSET_GUID: usize = 10;
-const COL_STORE_ID: usize = 11;
-const COL_GENRE: usize = 12;
+const COL_ASSET_GUID: usize = 9;
+const COL_GENRE: usize = 10;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub(crate) struct ProgressTableHint {
@@ -363,9 +357,7 @@ fn map_row(row: &Row<'_>) -> BookRecord {
         last_opened_at: apple_timestamp_to_datetime(last_opened_raw),
         last_engaged_at: apple_timestamp_to_datetime(last_engaged_raw),
         library_record_created_at: apple_timestamp_to_datetime(created_raw),
-        asset_id: read_opt::<i64>(row, COL_ASSET_ID),
         asset_guid: read_opt::<String>(row, COL_ASSET_GUID),
-        store_id: read_opt::<i64>(row, COL_STORE_ID),
         genre: read_opt::<String>(row, COL_GENRE),
     }
 }
@@ -383,8 +375,8 @@ fn sort_records(records: &mut [BookRecord]) {
         compare_desc_option_datetime(left.finished_at.as_ref(), right.finished_at.as_ref())
             .then_with(|| left.title.cmp(&right.title))
             .then_with(|| left.author.cmp(&right.author))
-            .then_with(|| left.asset_id.cmp(&right.asset_id))
             .then_with(|| left.asset_guid.cmp(&right.asset_guid))
+            .then_with(|| left.genre.cmp(&right.genre))
     });
 }
 
@@ -673,7 +665,7 @@ mod tests {
             - 978_307_200.0;
         conn.execute(
             &format!(
-                "INSERT INTO {REQUIRED_TABLE} VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)"
+                "INSERT INTO {REQUIRED_TABLE} VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)"
             ),
             rusqlite::params![
                 "The Great Gatsby",
@@ -685,9 +677,7 @@ mod tests {
                 719_845_287.0,
                 finished_at,
                 748_980_784.0,
-                914_355_894_i64,
                 "0511A38E-2F6B-4521-8116-D1E4FB0324AC",
-                914_355_894_i64,
                 "Classics"
             ],
         )
@@ -702,7 +692,10 @@ mod tests {
         assert_eq!(book.status, crate::model::BookStatus::Finished);
         assert_eq!(book.reading_progress, Some(1.0));
         assert_eq!(book.high_watermark_progress, Some(1.0));
-        assert_eq!(book.asset_id, Some(914_355_894));
+        assert_eq!(
+            book.asset_guid.as_deref(),
+            Some("0511A38E-2F6B-4521-8116-D1E4FB0324AC")
+        );
     }
 
     #[test]
@@ -710,7 +703,7 @@ mod tests {
         let conn = fixture_connection();
         conn.execute(
             &format!(
-                "INSERT INTO {REQUIRED_TABLE} VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)"
+                "INSERT INTO {REQUIRED_TABLE} VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)"
             ),
             rusqlite::params![
                 "Book",
@@ -722,9 +715,7 @@ mod tests {
                 "also-bad",
                 null::<i64>(),
                 null::<i64>(),
-                12_i64,
                 "GUID",
-                12_i64,
                 "Genre"
             ],
         )
@@ -746,7 +737,7 @@ mod tests {
         let conn = fixture_connection();
         conn.execute(
             &format!(
-                "INSERT INTO {REQUIRED_TABLE} VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)"
+                "INSERT INTO {REQUIRED_TABLE} VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)"
             ),
             rusqlite::params![
                 "Book",
@@ -758,9 +749,7 @@ mod tests {
                 null::<i64>(),
                 null::<i64>(),
                 null::<i64>(),
-                12_i64,
                 "GUID",
-                12_i64,
                 "Genre"
             ],
         )
@@ -779,7 +768,7 @@ mod tests {
         let conn = fixture_connection();
         conn.execute(
             &format!(
-                "INSERT INTO {REQUIRED_TABLE} VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)"
+                "INSERT INTO {REQUIRED_TABLE} VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)"
             ),
             rusqlite::params![
                 "Finished Book",
@@ -791,9 +780,7 @@ mod tests {
                 null::<i64>(),
                 null::<i64>(),
                 null::<i64>(),
-                12_i64,
                 "GUID",
-                12_i64,
                 "Genre"
             ],
         )
@@ -814,7 +801,7 @@ mod tests {
             .iter()
             .map(|column| {
                 let ty = match *column {
-                    "ZISFINISHED" | "ZASSETID" | "ZSTOREID" => "INTEGER",
+                    "ZISFINISHED" => "INTEGER",
                     "ZREADINGPROGRESS"
                     | "ZBOOKHIGHWATERMARKPROGRESS"
                     | "ZDATEFINISHED"
@@ -845,9 +832,7 @@ mod tests {
                     ZLASTOPENDATE REAL,
                     ZLASTENGAGEDDATE REAL,
                     ZCREATIONDATE REAL,
-                    ZASSETID INTEGER,
                     ZASSETGUID TEXT,
-                    ZSTOREID INTEGER,
                     ZGENRE TEXT
                 )"
             ),

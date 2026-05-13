@@ -88,9 +88,7 @@ Each row is one library asset. JSON and CSV use the same logical columns (JSON u
 | `last_opened_at` | Optional UTC datetime |
 | `last_engaged_at` | Optional UTC datetime |
 | `library_record_created_at` | Optional UTC datetime |
-| `asset_id` | Optional integer |
 | `asset_guid` | Optional string |
-| `store_id` | Optional integer |
 | `genre` | Optional string |
 
 ### Compatibility

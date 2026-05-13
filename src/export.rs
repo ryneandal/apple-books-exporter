@@ -7,7 +7,7 @@ use csv::Writer;
 use crate::model::BookRecord;
 use crate::model::format_datetime;
 
-const CSV_HEADER: [&str; 13] = [
+const CSV_HEADER: [&str; 11] = [
     "title",
     "author",
     "status",
@@ -17,9 +17,7 @@ const CSV_HEADER: [&str; 13] = [
     "last_opened_at",
     "last_engaged_at",
     "library_record_created_at",
-    "asset_id",
     "asset_guid",
-    "store_id",
     "genre",
 ];
 
@@ -70,9 +68,7 @@ fn write_csv(writer: impl Write, records: &[BookRecord]) -> Result<()> {
             format_opt_datetime(record.last_opened_at.as_ref()),
             format_opt_datetime(record.last_engaged_at.as_ref()),
             format_opt_datetime(record.library_record_created_at.as_ref()),
-            opt_to_string(record.asset_id),
             record.asset_guid.clone().unwrap_or_default(),
-            opt_to_string(record.store_id),
             record.genre.clone().unwrap_or_default(),
         ])?;
     }
