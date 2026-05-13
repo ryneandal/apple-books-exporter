@@ -1,11 +1,11 @@
 use std::io::Write;
 
 use anyhow::Result;
+use clap::ValueEnum;
 use csv::Writer;
 
-use crate::cli::OutputFormat;
 use crate::model::BookRecord;
-use crate::timeconv::format_datetime;
+use crate::model::format_datetime;
 
 const CSV_HEADER: [&str; 13] = [
     "title",
@@ -22,6 +22,12 @@ const CSV_HEADER: [&str; 13] = [
     "store_id",
     "genre",
 ];
+
+#[derive(Clone, Copy, Debug, Eq, PartialEq, ValueEnum)]
+pub(crate) enum OutputFormat {
+    Json,
+    Csv,
+}
 
 pub(crate) fn write_records(
     writer: impl Write,
@@ -50,19 +56,23 @@ fn write_csv(writer: impl Write, records: &[BookRecord]) -> Result<()> {
     csv.write_record(CSV_HEADER)?;
 
     for record in records {
+        let format_opt_datetime = |value: Option<&chrono::DateTime<chrono::Utc>>| {
+            value.map(format_datetime).unwrap_or_default()
+        };
+
         csv.write_record([
             record.title.clone(),
             record.author.clone().unwrap_or_default(),
-            serde_variant(&record.status).to_string(),
-            opt_f64(record.reading_progress),
-            opt_f64(record.high_watermark_progress),
-            opt_dt(record.finished_at.as_ref()),
-            opt_dt(record.last_opened_at.as_ref()),
-            opt_dt(record.last_engaged_at.as_ref()),
-            opt_dt(record.library_record_created_at.as_ref()),
-            opt_i64(record.asset_id),
+            record.status.as_str().to_string(),
+            opt_to_string(record.reading_progress),
+            opt_to_string(record.high_watermark_progress),
+            format_opt_datetime(record.finished_at.as_ref()),
+            format_opt_datetime(record.last_opened_at.as_ref()),
+            format_opt_datetime(record.last_engaged_at.as_ref()),
+            format_opt_datetime(record.library_record_created_at.as_ref()),
+            opt_to_string(record.asset_id),
             record.asset_guid.clone().unwrap_or_default(),
-            opt_i64(record.store_id),
+            opt_to_string(record.store_id),
             record.genre.clone().unwrap_or_default(),
         ])?;
     }
@@ -71,22 +81,6 @@ fn write_csv(writer: impl Write, records: &[BookRecord]) -> Result<()> {
     Ok(())
 }
 
-fn serde_variant(status: &crate::model::BookStatus) -> &'static str {
-    match status {
-        crate::model::BookStatus::Finished => "finished",
-        crate::model::BookStatus::InProgress => "in_progress",
-        crate::model::BookStatus::NotStartedOrUnknown => "not_started_or_unknown",
-    }
-}
-
-fn opt_f64(value: Option<f64>) -> String {
+fn opt_to_string<T: ToString>(value: Option<T>) -> String {
     value.map(|value| value.to_string()).unwrap_or_default()
-}
-
-fn opt_i64(value: Option<i64>) -> String {
-    value.map(|value| value.to_string()).unwrap_or_default()
-}
-
-fn opt_dt(value: Option<&chrono::DateTime<chrono::Utc>>) -> String {
-    value.map(format_datetime).unwrap_or_default()
 }
